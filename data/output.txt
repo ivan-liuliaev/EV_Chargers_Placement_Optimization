@@ -1,0 +1,19 @@
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.000000000000e+03, best bound 3.000000000000e+03, gap 0.0000%
+Optimal solution found:
+Build 5 charging spots at site Area5
+Build 4 charging spots at site Area4
+Build 5 charging spots at site Area6
+Build 1 charging spots at site Area10
+Effective coverage for area Area1: 100.00% of capacity
+Effective coverage for area Area2: 100.00% of capacity
+Effective coverage for area Area3: 100.00% of capacity
+Effective coverage for area Area4: 100.00% of capacity
+Effective coverage for area Area5: 100.00% of capacity
+Effective coverage for area Area6: 17.29% of capacity
+Effective coverage for area Area7: 36.77% of capacity
+Effective coverage for area Area8: 95.05% of capacity
+Effective coverage for area Area9: 19.56% of capacity
+Effective coverage for area Area10: 82.35% of capacity
+
+
