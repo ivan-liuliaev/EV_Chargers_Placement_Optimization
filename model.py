@@ -129,10 +129,11 @@ model = Model("EV Charging Station Placement with Charger Capacities")
 # Decision variables
 build = model.addVars(P, vtype=GRB.INTEGER, lb=0, ub=MAX_CHARGERS, name="build")  # Number of charging spots at each site
 served = model.addVars(P, A, vtype=GRB.CONTINUOUS, lb=0, name="served")  # Trips served from site i to area j
-z = model.addVars(A, vtype=GRB.CONTINUOUS, lb=0, ub=1, name="z")  # Saturation level for each area
 
-# Auxiliary variable for raw saturation calculation
-saturation_raw = model.addVars(A, vtype=GRB.CONTINUOUS, lb=0, name="saturation_raw")
+# Auxiliary variables
+z = model.addVars(A, vtype=GRB.CONTINUOUS, lb=0, ub=1, name="z")  # Saturation level for each area
+saturation_raw = model.addVars(A, vtype=GRB.CONTINUOUS, lb=0, name="saturation_raw") # Auxiliary variable for raw saturation calculation
+is_built = model.addVars(P, vtype=GRB.BINARY, name="is_built") # Binary Auxiliary variable indicating whether a station is built at site j
 
 # Objective: Maximize the total effective coverage across all areas
 model.setObjective(quicksum(z[j] * c[j] for j in A), GRB.MAXIMIZE)
@@ -156,13 +157,25 @@ for j in A:
     model.addConstr(saturation_raw[j] == quicksum(served[i, j] for i in P if (i, j) in tr) / c[j], name=f"saturation_raw_{j}")
 
 
-
-# Saturation calculation: z[j] is the minimum of 1 and saturation_raw[j]
+# Link is_built[j] with build[j]: if build[j] > 0, then is_built[j] = 1
+for j in P:
+    model.addGenConstrIndicator(is_built[j], True, build[j] >= 1, name=f"is_built_{j}_linked")
+# Saturation constraint constraint: z_effective[j] is min(z[j], 1) unless there is a station directly in the area
 for j in A:
-    model.addGenConstrMin(z[j], [saturation_raw[j], 1], name=f"saturation_{j}")
+    if j in P:  # If area j has a potential station site
+        # When build[j] >= 1, enforce z_effective[j] = 1
+        model.addGenConstrIndicator(is_built[j], True, z[j] == 1, name=f"station_is_in_the_area_{j}")
+    else:
+        # Otherwise, z_effective[j] is the minimum of z[j] and 1
+        model.addGenConstrMin(z[j], [saturation_raw[j], 1], name=f"min_constraint_{j}")
 
-# New constraint: Limit the total number of chargers built across all sites to chargers_budget_limit
+
+
+
+# Budget constraint: Limit the total number of chargers built across all sites to chargers_budget_limit
 model.addConstr(quicksum(build[i] for i in P) <= CHARGERS_BUDGET_LIMIT, name="chargers_budget_limit")
+
+
 
 # Optimize the model
 model.optimize()
