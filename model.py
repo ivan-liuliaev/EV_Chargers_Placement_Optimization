@@ -39,9 +39,9 @@ P = loaded_data['potential_sites']
 c = loaded_data['areas_demand']
 tr = loaded_data['trips']
 
-CHARGERS_BUDGET_LIMIT = 15
-CAP_SPOT = 200              
-MAX_CHARGERS = 5
+CHARGERS_BUDGET_LIMIT = 3500
+CAP_SPOT = 35294              
+MAX_CHARGERS = 60
 
 
 # -------------------------------------------------------------------------------------------- 
@@ -105,15 +105,73 @@ model.addConstr(quicksum(build[i] for i in P) <= CHARGERS_BUDGET_LIMIT, name="ch
 # Optimize the model
 model.optimize()
 
-# Display results
+
+
+# Display results in the requested format
 if model.status == GRB.OPTIMAL:
-    print("Optimal solution found:")
-    for i in P:
-        if build[i].x > 0.5:
-            print(f"Build {int(build[i].x)} charging spots at site {i}")
-    for j in A:
-        a = 1
-        print(f"Effective coverage for area {j}: {z[j].x * 100:.2f}% of capacity")
+    total_demand = sum(c[j] for j in A)
+    total_demand_covered = sum(min(saturation_raw[j].x * c[j], c[j]) for j in A)
+    total_demand_covered_percent = (total_demand_covered / total_demand) * 100 if total_demand > 0 else 0
+
+    print(f"Total demand: {total_demand:.2f}")
+    print(f"Total demand covered: {total_demand_covered:.2f}")
+    print(f"Total demand covered (percent): {total_demand_covered_percent:.2f}%\n")
+
+    fully_covered_areas = [j for j in A if saturation_raw[j].x >= 1]
+    fully_covered_count = len(fully_covered_areas)
+    fully_covered_total_demand = sum(c[j] for j in fully_covered_areas)
+    fully_covered_mean_demand = fully_covered_total_demand / fully_covered_count if fully_covered_count > 0 else 0
+
+    print(f"Fully covered areas:")
+    print(f"  Count: {fully_covered_count}")
+    print(f"  Mean area demand: {fully_covered_mean_demand:.2f}")
+    print(f"  Total areas demand: {fully_covered_total_demand:.2f}\n")
+
+    partially_covered_areas = [j for j in A if 0 < saturation_raw[j].x < 1]
+    partially_covered_count = len(partially_covered_areas)
+    partially_covered_total_demand = sum(c[j] for j in partially_covered_areas)
+    partially_covered_demand_covered = sum(saturation_raw[j].x * c[j] for j in partially_covered_areas)
+    partially_covered_mean_demand = (
+        partially_covered_total_demand / partially_covered_count if partially_covered_count > 0 else 0
+    )
+    partially_covered_mean_demand_covered = (
+        partially_covered_demand_covered / partially_covered_count if partially_covered_count > 0 else 0
+    )
+
+    print(f"Partially covered areas:")
+    print(f"  Count: {partially_covered_count}")
+    print(f"  Mean area demand (including demand not covered): {partially_covered_mean_demand:.2f}")
+    print(f"  Mean area demand covered: {partially_covered_mean_demand_covered:.2f}")
+    print(f"  Total areas demand covered: {partially_covered_demand_covered:.2f}")
+    print(f"  Total areas demand (including demand not covered): {partially_covered_total_demand:.2f}\n")
+
+    not_covered_areas = [j for j in A if saturation_raw[j].x == 0]
+    not_covered_count = len(not_covered_areas)
+    not_covered_total_demand = sum(c[j] for j in not_covered_areas)
+    not_covered_mean_demand = not_covered_total_demand / not_covered_count if not_covered_count > 0 else 0
+
+    print(f"Areas not covered at all:")
+    print(f"  Count: {not_covered_count}")
+    print(f"  Mean area demand: {not_covered_mean_demand:.2f}")
+    print(f"  Total areas demand: {not_covered_total_demand:.2f}")
 
 else:
     print("No optimal solution found.")
+
+
+
+
+
+# # Display results
+# if model.status == GRB.OPTIMAL:
+#     print("Optimal solution found:")
+#     for i in P:
+#         if build[i].x > 0.5:
+#             print(f"Build {int(build[i].x)} charging spots at site {i}")
+#     for j in A:
+#         a = 1
+#         print(f"Effective coverage for area {j}: {z[j].x * 100:.2f}% of capacity")
+
+# else:
+#     print("No optimal solution found.")
+
