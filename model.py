@@ -63,47 +63,49 @@ is_built = model.addVars(P, vtype=GRB.BINARY, name="is_built") # Binary Auxiliar
 # Objective: Maximize the total effective coverage across all areas
 model.setObjective(quicksum(z[j] * c[j] for j in A), GRB.MAXIMIZE)
 
-
 # Constraints
 # Capacity constraint: Total trips served from site i to all areas cannot exceed the capacity from installed chargers
 for i in P:
     model.addConstr(quicksum(served[i, j] for j in A) <= build[i] * CAP_SPOT, name=f"capacity_constraint_{i}")
 
-
+# Prioritize local demand fulfillment for each station
+for i in P:
+    if i in A:  # Ensure the station `i` has its own area
+        # Add binary variable to decide between demand and capacity
+        is_capacity_limited = model.addVar(vtype=GRB.BINARY, name=f"is_capacity_limited_{i}")
+        
+        # If the station's capacity is smaller than the area's demand
+        model.addConstr(served[i, i] <= build[i] * CAP_SPOT, name=f"local_capacity_limit_{i}")
+        
+        # If the area's demand is smaller, fulfill it entirely
+        model.addConstr(served[i, i] <= c[i], name=f"local_demand_limit_{i}")
+        
+        # Logic for binary variable: either satisfy capacity or demand
+        model.addConstr(
+            served[i, i] == is_capacity_limited * (build[i] * CAP_SPOT) + (1 - is_capacity_limited) * c[i],
+            name=f"local_demand_served_{i}"
+        )
 
 # Trip limit constraint: Trips served from site i to area j cannot exceed the actual trips
 for i, j in tr:
     model.addConstr(served[i, j] <= tr[i, j], name=f"trip_limit_{i}_{j}")
 
-
-
 # Raw saturation calculation for each area
 for j in A:
     model.addConstr(saturation_raw[j] == quicksum(served[i, j] for i in P if (i, j) in tr) / c[j], name=f"saturation_raw_{j}")
-
 
 # Link is_built[j] with build[j]: if build[j] > 0, then is_built[j] = 1
 for j in P:
     model.addGenConstrIndicator(is_built[j], True, build[j] >= 1, name=f"is_built_{j}_linked")
 
-
-# Saturation constraint constraint: z_effective[j] is min(z[j], 1) unless there is a station directly in the area
+# Saturation constraint: z[j] is the minimum of saturation_raw[j] and 1
 for j in A:
     if j in P:  # If area j has a potential station site
-        # When build[j] >= 1, enforce z_effective[j] = 1
         model.addGenConstrIndicator(is_built[j], True, z[j] == 1, name=f"station_is_in_the_area_{j}")
-        
-    # Otherwise, z_effective[j] is the minimum of z[j] and 1
     model.addGenConstrMin(z[j], [saturation_raw[j], 1], name=f"min_constraint_{j}")
-
-
-
-
 
 # Budget constraint: Limit the total number of chargers built across all sites to chargers_budget_limit
 model.addConstr(quicksum(build[i] for i in P) <= CHARGERS_BUDGET_LIMIT, name="chargers_budget_limit")
-
-
 
 # Optimize the model
 model.optimize()
@@ -167,7 +169,6 @@ else:
 # -------------------------------------------------------------------------------------------- 
 # -------------------------------------------------------------------------------------------- 
 # ---------------------------- OUTPUT EXPORT -------------------------------------------------
-
 
 # Extract data about stations built and chargers
 if model.status == GRB.OPTIMAL:
