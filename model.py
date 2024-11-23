@@ -161,17 +161,24 @@ else:
 
 
 
+# -------------------------------------------------------------------------------------------- 
+# -------------------------------------------------------------------------------------------- 
+# ---------------------------- OUTPUT EXPORT -------------------------------------------------
 
-# # Display results
-# if model.status == GRB.OPTIMAL:
-#     print("Optimal solution found:")
-#     for i in P:
-#         if build[i].x > 0.5:
-#             print(f"Build {int(build[i].x)} charging spots at site {i}")
-#     for j in A:
-#         a = 1
-#         print(f"Effective coverage for area {j}: {z[j].x * 100:.2f}% of capacity")
 
-# else:
-#     print("No optimal solution found.")
+# Extract data about stations built and chargers
+if model.status == GRB.OPTIMAL:
+    built_stations = {j: build[j].x for j in P if build[j].x > 0}  # Only include sites where chargers are built
+    coverage_percentages = {j: saturation_raw[j].x * 100 for j in A}  # Calculate coverage as a percentage
 
+    # Export built stations and chargers to a pickle file
+    with open("./data/model_output/built_stations.pkl", "wb") as f:
+        pickle.dump(built_stations, f)
+    print(f"Exported built stations and chargers data to 'built_stations.pkl'.")
+
+    # Export coverage percentages to a pickle file
+    with open("./data/model_output/coverage_percentages.pkl", "wb") as f:
+        pickle.dump(coverage_percentages, f)
+    print(f"Exported coverage percentages to 'coverage_percentages.pkl'.")
+else:
+    print("No optimal solution found. Data not exported.")
