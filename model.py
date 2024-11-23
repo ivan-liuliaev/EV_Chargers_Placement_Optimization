@@ -85,14 +85,17 @@ for j in A:
 # Link is_built[j] with build[j]: if build[j] > 0, then is_built[j] = 1
 for j in P:
     model.addGenConstrIndicator(is_built[j], True, build[j] >= 1, name=f"is_built_{j}_linked")
+
+
 # Saturation constraint constraint: z_effective[j] is min(z[j], 1) unless there is a station directly in the area
 for j in A:
     if j in P:  # If area j has a potential station site
         # When build[j] >= 1, enforce z_effective[j] = 1
         model.addGenConstrIndicator(is_built[j], True, z[j] == 1, name=f"station_is_in_the_area_{j}")
-    else:
-        # Otherwise, z_effective[j] is the minimum of z[j] and 1
-        model.addGenConstrMin(z[j], [saturation_raw[j], 1], name=f"min_constraint_{j}")
+        
+    # Otherwise, z_effective[j] is the minimum of z[j] and 1
+    model.addGenConstrMin(z[j], [saturation_raw[j], 1], name=f"min_constraint_{j}")
+
 
 
 
