@@ -1,32 +1,24 @@
 import pickle
 import json
 import gurobipy as gp
+import time
 
 
 def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_budget_limit, previous_built_stations, area_demand):
-    # ---------------------------- UPDATE PARAMETERS ---------------------------------------
-    print(f"Updating parameters: CAP_SPOT={cap_spot}, MAX_CHARGERS={max_chargers}, BUDGET={chargers_budget_limit}")
-    
     # Update MAX_CHARGERS
     for j in model.getVars():
         if j.VarName.startswith("build["):
             j.UB = max_chargers  # Update upper bound for chargers at each site
-
-    # Update CAP_SPOT
-    for i in model.getConstrs():
-        if i.ConstrName.startswith("capacity_constraint_"):
-            site = int(i.ConstrName.split("_")[-1])
-            if site in previous_built_stations:
-                i.RHS = cap_spot * previous_built_stations[site]
-            else:
-                i.RHS = cap_spot
-
+            site = int(j.VarName.split("[")[1].rstrip("]"))
+            j.LB = previous_built_stations.get(site, 0)  # Set lower bound to previous built chargers
+    
+    # Do NOT update capacity constraints
+    # Keep them as sum over served[i, j] <= build[i] * CAP_SPOT
+    
     # Update budget limit
     model.getConstrByName("chargers_budget_limit").RHS = chargers_budget_limit
-    print("Parameters updated successfully.")
 
-    # ---------------------------- APPLY WARM START ----------------------------------------
-    print("Applying warm start...")
+    # Apply warm start
     for var in model.getVars():
         if var.VarName.startswith("build["):
             site = int(var.VarName.split("[")[1].rstrip("]"))
@@ -37,7 +29,12 @@ def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_b
     # Turn off Gurobi logging
     model.setParam('OutputFlag', 0)
     print(f"Resolving the model...")
+    start_time = time.time()
     model.optimize()
+    end_time = time.time()
+    
+    solving_time = end_time - start_time
+    print(f"Solving time: {solving_time:.2f} seconds")
 
     # ---------------------------- OUTPUT RESULTS ------------------------------------------
     if model.status == gp.GRB.OPTIMAL:
@@ -49,8 +46,9 @@ def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_b
             if var.VarName.startswith("saturation_raw["):
                 area_id = var.VarName.split("[")[1].rstrip("]")
                 if area_id in area_demand:
-                    coverage = var.X * area_demand[area_id]
+                    coverage = min(var.X * area_demand[area_id], area_demand[area_id])
                     total_demand_coverage += coverage
+
 
         total_coverage_percentage = (total_demand_coverage / total_demand) * 100 if total_demand > 0 else 0
         print(f"Total Demand Coverage: {total_demand_coverage:.2f} ({total_coverage_percentage:.2f}%)")
@@ -63,8 +61,6 @@ def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_b
     else:
         print("No optimal solution found.")
         return None
-
-
 
 
 
@@ -87,8 +83,12 @@ except FileNotFoundError:
     print("No previous solution found. Starting fresh.")
 
 # Define hyperparameter combinations
-budgets = range(50, 150, 50)
-CAP_SPOT = 40000
+# CHARGERS_BUDGET_LIMIT = 3500
+# CAP_SPOT = 35294              
+# MAX_CHARGERS = 60
+
+budgets = range(3500, 3501, 100)
+CAP_SPOT = 35294
 MAX_CHARGERS = 60
 
 # Placeholder for results
