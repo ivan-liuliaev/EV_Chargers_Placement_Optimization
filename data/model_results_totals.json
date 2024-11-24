@@ -1,0 +1,12 @@
+[
+    {
+        "budget": 50,
+        "total_demand_coverage": 31524700.000000004,
+        "total_coverage_percentage": 9.084854070725685
+    },
+    {
+        "budget": 100,
+        "total_demand_coverage": 33289400.000000004,
+        "total_coverage_percentage": 9.593409012679443
+    }
+]

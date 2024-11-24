@@ -1,117 +1,124 @@
 import pickle
+import json
 import gurobipy as gp
-from gurobipy import Model, GRB, quicksum
 
-# ---------------------------- LOAD PREVIOUS SOLUTION ---------------------------------
-try:
-    with open("./data/model_output/built_stations.pkl", "rb") as f:
-        previous_built_stations = pickle.load(f)
-    print("Loaded previous solution for warm start.")
-except FileNotFoundError:
-    print("Previous solution not found. Starting without warm start.")
-    previous_built_stations = {}
 
-# ---------------------------- LOAD MODEL ---------------------------------------------
+def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_budget_limit, previous_built_stations, area_demand):
+    # ---------------------------- UPDATE PARAMETERS ---------------------------------------
+    print(f"Updating parameters: CAP_SPOT={cap_spot}, MAX_CHARGERS={max_chargers}, BUDGET={chargers_budget_limit}")
+    
+    # Update MAX_CHARGERS
+    for j in model.getVars():
+        if j.VarName.startswith("build["):
+            j.UB = max_chargers  # Update upper bound for chargers at each site
 
-try:
-    # Load the saved model
-    model = gp.read("./data/model_output/saved_model.mps")
-    print("Model loaded successfully.")
-except FileNotFoundError:
-    print("Saved model not found. Ensure the model has been saved.")
-    raise
+    # Update CAP_SPOT
+    for i in model.getConstrs():
+        if i.ConstrName.startswith("capacity_constraint_"):
+            site = int(i.ConstrName.split("_")[-1])
+            if site in previous_built_stations:
+                i.RHS = cap_spot * previous_built_stations[site]
+            else:
+                i.RHS = cap_spot
 
-# ---------------------------- APPLY WARM START ----------------------------------------
+    # Update budget limit
+    model.getConstrByName("chargers_budget_limit").RHS = chargers_budget_limit
+    print("Parameters updated successfully.")
 
-# Load additional data if needed (e.g., trips, demand, etc.)
+    # ---------------------------- APPLY WARM START ----------------------------------------
+    print("Applying warm start...")
+    for var in model.getVars():
+        if var.VarName.startswith("build["):
+            site = int(var.VarName.split("[")[1].rstrip("]"))
+            var.Start = previous_built_stations.get(site, 0)
+    print("Warm start applied.")
+
+    # ---------------------------- RESOLVE THE MODEL ---------------------------------------
+    # Turn off Gurobi logging
+    model.setParam('OutputFlag', 0)
+    print(f"Resolving the model...")
+    model.optimize()
+
+    # ---------------------------- OUTPUT RESULTS ------------------------------------------
+    if model.status == gp.GRB.OPTIMAL:
+        print("Optimal solution found. Calculating total demand coverage...")
+
+        total_demand_coverage = 0
+        total_demand = sum(area_demand.values())  # Total demand across all areas
+        for var in model.getVars():
+            if var.VarName.startswith("saturation_raw["):
+                area_id = var.VarName.split("[")[1].rstrip("]")
+                if area_id in area_demand:
+                    coverage = var.X * area_demand[area_id]
+                    total_demand_coverage += coverage
+
+        total_coverage_percentage = (total_demand_coverage / total_demand) * 100 if total_demand > 0 else 0
+        print(f"Total Demand Coverage: {total_demand_coverage:.2f} ({total_coverage_percentage:.2f}%)")
+        
+        return {
+            "total_demand_coverage": total_demand_coverage,
+            "total_coverage_percentage": total_coverage_percentage,
+            "objective": model.ObjVal
+        }
+    else:
+        print("No optimal solution found.")
+        return None
+
+
+
+
+
+
+
+# Load the model once
+model = gp.read("./data/model_output/saved_model.mps")
+print("Model loaded successfully.")
+
+# Load demand data and warm start data
 with open("./data/georgia_processed_data/georgia_processed_data.pkl", "rb") as f:
     loaded_data = pickle.load(f)
 
-A = loaded_data['areas']
-P = loaded_data['potential_sites']
-c = loaded_data['areas_demand']
-tr = loaded_data['trips']
+c = loaded_data['areas_demand']  # Area demand
+previous_built_stations = {}
+try:
+    with open("./data/model_output/built_stations.pkl", "rb") as f:
+        previous_built_stations = pickle.load(f)
+except FileNotFoundError:
+    print("No previous solution found. Starting fresh.")
 
+# Define hyperparameter combinations
+budgets = range(50, 150, 50)
+CAP_SPOT = 40000
+MAX_CHARGERS = 60
 
+# Placeholder for results
+results = []
 
-# ---------------------------- TWEAK PARAMETERS ---------------------------------------
-# CHARGERS_BUDGET_LIMIT = 3500
-# CAP_SPOT = 35294              
-# MAX_CHARGERS = 60
-
-
-# Updated parameters
-CAP_SPOT = 350000  
-MAX_CHARGERS = 50 
-CHARGERS_BUDGET_LIMIT = 500  
-
-# Update bounds for `build` variables (MAX_CHARGERS)
-for j in P:
-    var = model.getVarByName(f"build[{j}]")
-    if var:
-        var.UB = MAX_CHARGERS  # Update upper bound for chargers at each site
-
-# Update capacity constraints (CAP_SPOT)
-for i in P:
-    constr = model.getConstrByName(f"capacity_constraint_{i}")
-    if constr:
-        # Modify the right-hand side of the capacity constraint
-        constr.RHS = CAP_SPOT * model.getVarByName(f"build[{i}]").Start if f"build[{i}]" in previous_built_stations else CAP_SPOT
-
-
-# Update the budget limit or any other constraints
-model.getConstrByName("chargers_budget_limit").RHS = CHARGERS_BUDGET_LIMIT
-
-
-
-# ---------------------------- APPLY WARM START ----------------------------------------
-
-# Apply warm start: Set initial values based on the previous solution
-for j in P:
-    # Warm start for station builds
-    var = model.getVarByName(f"build[{j}]")
-    if var:
-        var.Start = previous_built_stations.get(j, 0)  # Use previous solution or default to 0
-
-for (i, j) in tr:
-    # Warm start for trips served
-    var = model.getVarByName(f"served[{i},{j}]")
-    if var and i in previous_built_stations:
-        var.Start = min(tr[i, j], previous_built_stations.get(i, 0) * 35294)  # Adjust for capacity
-    elif var:
-        var.Start = 0
-
-# ---------------------------- RESOLVE THE MODEL ---------------------------------------
-
-print(f"Resolving the model with a new budget limit: {CHARGERS_BUDGET_LIMIT}")
-model.optimize()
-
-# ---------------------------- OUTPUT RESULTS ------------------------------------------
-
-if model.status == GRB.OPTIMAL:
-    print("Resolved Model Results:")
-    total_demand = sum(c[j] for j in A)
-    total_demand_covered = sum(
-        min(model.getVarByName(f"saturation_raw[{j}]").X * c[j], c[j]) for j in A
+# Solve the model for each budget
+for budget in budgets:
+    print(f"\n--- Running for Budget = {budget} ---")
+    result = resolve_model_with_hyperparameters(
+        model=model,
+        cap_spot=CAP_SPOT,
+        max_chargers=MAX_CHARGERS,
+        chargers_budget_limit=budget,
+        previous_built_stations=previous_built_stations,
+        area_demand=c,  # Pass demand data
     )
-    total_demand_covered_percent = (total_demand_covered / total_demand) * 100 if total_demand > 0 else 0
+    if result:
+        results.append({
+            "budget": budget,
+            "total_demand_coverage": result["total_demand_coverage"],
+            "total_coverage_percentage": result["total_coverage_percentage"]
+        })
+        print(f"Accumulated Result: Budget={budget}, Total Demand Coverage={result['total_demand_coverage']:.2f}, "
+              f"Percentage={result['total_coverage_percentage']:.2f}%")
+    else:
+        print(f"Failed to find optimal solution for Budget={budget}.")
 
-    print(f"Total demand: {total_demand:.2f}")
-    print(f"Total demand covered: {total_demand_covered:.2f}")
-    print(f"Total demand covered (percent): {total_demand_covered_percent:.2f}%\n")
+# Export results to a JSON file
+output_file = "./data/model_results_totals.json"
+with open(output_file, "w") as f:
+    json.dump(results, f, indent=4)
 
-    # Export the updated results
-    built_stations = {j: model.getVarByName(f"build[{j}]").X for j in P if model.getVarByName(f"build[{j}]").X > 0}
-    coverage_percentages = {
-        j: model.getVarByName(f"saturation_raw[{j}]").X * 100 for j in A
-    }
-
-    with open("./data/model_output/built_stations.pkl", "wb") as f:
-        pickle.dump(built_stations, f)
-    print(f"Updated built stations and chargers data exported to 'built_stations.pkl'.")
-
-    with open("./data/model_output/coverage_percentages.pkl", "wb") as f:
-        pickle.dump(coverage_percentages, f)
-    print(f"Updated coverage percentages exported to 'coverage_percentages.pkl'.")
-else:
-    print("No optimal solution found after resolving.")
+print(f"\nResults saved to {output_file}")
