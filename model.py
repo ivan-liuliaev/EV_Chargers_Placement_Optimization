@@ -114,6 +114,9 @@ for j in A:
 # Budget constraint: Limit the total number of chargers built across all sites to chargers_budget_limit
 model.addConstr(quicksum(build[i] for i in P) <= CHARGERS_BUDGET_LIMIT, name="chargers_budget_limit")
 
+# Save model in MPS format for warm start
+model.write("./data/model_output/saved_model.mps")  
+
 # Optimize the model
 model.optimize()
 
