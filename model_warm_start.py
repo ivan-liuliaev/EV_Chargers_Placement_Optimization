@@ -32,9 +32,39 @@ P = loaded_data['potential_sites']
 c = loaded_data['areas_demand']
 tr = loaded_data['trips']
 
-# Update the budget limit or any other hyperparameters
-CHARGERS_BUDGET_LIMIT = 4000  # Example of a new budget
+
+
+# ---------------------------- TWEAK PARAMETERS ---------------------------------------
+# CHARGERS_BUDGET_LIMIT = 3500
+# CAP_SPOT = 35294              
+# MAX_CHARGERS = 60
+
+
+# Updated parameters
+CAP_SPOT = 350000  
+MAX_CHARGERS = 50 
+CHARGERS_BUDGET_LIMIT = 500  
+
+# Update bounds for `build` variables (MAX_CHARGERS)
+for j in P:
+    var = model.getVarByName(f"build[{j}]")
+    if var:
+        var.UB = MAX_CHARGERS  # Update upper bound for chargers at each site
+
+# Update capacity constraints (CAP_SPOT)
+for i in P:
+    constr = model.getConstrByName(f"capacity_constraint_{i}")
+    if constr:
+        # Modify the right-hand side of the capacity constraint
+        constr.RHS = CAP_SPOT * model.getVarByName(f"build[{i}]").Start if f"build[{i}]" in previous_built_stations else CAP_SPOT
+
+
+# Update the budget limit or any other constraints
 model.getConstrByName("chargers_budget_limit").RHS = CHARGERS_BUDGET_LIMIT
+
+
+
+# ---------------------------- APPLY WARM START ----------------------------------------
 
 # Apply warm start: Set initial values based on the previous solution
 for j in P:
