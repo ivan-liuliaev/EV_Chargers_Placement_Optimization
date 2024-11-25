@@ -67,7 +67,9 @@ model = Model("EV Charging Station Placement with Charger Capacities")
 
 # Decision variables
 build = model.addVars(P, vtype=GRB.INTEGER, lb=0, ub=MAX_CHARGERS, name="build")  # Number of charging spots at each site
-served = model.addVars(P, A, vtype=GRB.CONTINUOUS, lb=0, name="served")  # Trips served from site i to area j
+# Define 'served' only for (i, j) in 'tr'
+served = model.addVars(tr.keys(), vtype=GRB.CONTINUOUS, lb=0, name="served")
+
 
 # Auxiliary variables
 z = model.addVars(A, vtype=GRB.CONTINUOUS, lb=0, ub=1, name="z")  # Saturation level for each area
@@ -81,7 +83,12 @@ model.setObjective(quicksum(z[j] * c[j] for j in A), GRB.MAXIMIZE)
 # CONSTRAINTS
 # Capacity constraint: Total trips served from site i to all areas cannot exceed the capacity from installed chargers
 for i in P:
-    model.addConstr(quicksum(served[i, j] for j in A) <= build[i] * CAP_SPOT, name=f"capacity_constraint_{i}")
+    trips_from_i = [j for (i_prime, j) in tr.keys() if i_prime == i]
+    model.addConstr(
+        quicksum(served[i, j] for j in trips_from_i) <= build[i] * CAP_SPOT,
+        name=f"capacity_constraint_{i}"
+    )
+
 
 # # Local demand constraint (doesnt do it job properly, but still should work)
 # for i in P:
@@ -97,7 +104,12 @@ for i, j in tr:
 
 # Raw saturation calculation for each area
 for j in A:
-    model.addConstr(saturation_raw[j] == quicksum(served[i, j] for i in P if (i, j) in tr) / c[j], name=f"saturation_raw_{j}")
+    trips_to_j = [i for (i, j_prime) in tr.keys() if j_prime == j]
+    model.addConstr(
+        saturation_raw[j] == quicksum(served[i, j] for i in trips_to_j) / c[j],
+        name=f"saturation_raw_{j}"
+    )
+
 
 # Link is_built[j] with build[j]: if build[j] > 0, then is_built[j] = 1
 for j in P:
@@ -152,7 +164,7 @@ if model.status in [gp.GRB.OPTIMAL, gp.GRB.SUBOPTIMAL]:
 
     print(f"Total demand: {total_demand:.2f}")
     print(f"Total demand covered: {total_demand_covered:.2f}")
-    print(f"Total demand covered (percent): {total_demand_covered_percent:.2f}%\n")
+    print(f"Total demand covered (percent): \033[1;31m{total_demand_covered_percent:.2f}%\033[0m\n")
 
     fully_covered_areas = [j for j in A if saturation_raw[j].x >= 1]
     fully_covered_count = len(fully_covered_areas)

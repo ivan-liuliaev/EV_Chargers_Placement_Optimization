@@ -4,7 +4,7 @@ import gurobipy as gp
 import time
 
 
-def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_budget_limit, previous_built_stations, area_demand):
+def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_budget_limit, previous_built_stations, area_demand, trips):
     model.reset()
     
     # Update MAX_CHARGERS
@@ -14,9 +14,21 @@ def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_b
             site = int(j.VarName.split("[")[1].rstrip("]"))
             j.LB = previous_built_stations.get(site, 0)  # Set lower bound to previous built chargers
     
-    # Do NOT update capacity constraints
-    # Keep them as sum over served[i, j] <= build[i] * CAP_SPOT
+    # Remove and rebuild capacity constraints
+    for constr in model.getConstrs():
+        if constr.ConstrName.startswith("capacity_constraint_"):
+            model.remove(constr)  # Remove the old constraint
     
+    model.update()  # Ensure the model reflects constraint removal
+
+    # Rebuild updated capacity constraints
+    for i in previous_built_stations.keys():
+        trips_from_i = [j for (i_prime, j) in trips.keys() if i_prime == i]
+        model.addConstr(
+            gp.quicksum(model.getVarByName(f"served[{i},{j}]") for j in trips_from_i) <= cap_spot * model.getVarByName(f"build[{i}]"),
+            name=f"capacity_constraint_{i}"
+        )
+
     # Update budget limit
     model.getConstrByName("chargers_budget_limit").RHS = chargers_budget_limit
 
@@ -27,16 +39,16 @@ def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_b
             var.Start = previous_built_stations.get(site, 0)
     print("Warm start applied.")
 
-    # Update the model to apply changes**
+    # Update the model to apply changes
     model.update()
 
     # ---------------------------- RESOLVE THE MODEL ---------------------------------------
     # Turn off Gurobi logging
     model.setParam('OutputFlag', 0)
 
-    # stop at objective conf.interval of N%
+    # Stop at objective confidence interval of 5%
     model.setParam('MIPGap', 0.05)
-    model.setParam('TimeLimit', 200)  # Stop after 300 seconds
+    model.setParam('TimeLimit', 200)  # Stop after 200 seconds
     
     print(f"Resolving the model...")
     start_time = time.time()
@@ -71,8 +83,9 @@ def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_b
 
 
         total_coverage_percentage = (total_demand_coverage / total_demand) * 100 if total_demand > 0 else 0
-        print(f"Total Demand Coverage: {total_demand_coverage:.2f} ({total_coverage_percentage:.2f}%)")
-        
+        print(f"Total Demand Coverage: {total_demand_coverage:.2f}%)")
+        print(f"Total Demand Coverage Percentage: \033[1;31m{total_coverage_percentage:.2f}%\033[0m")
+
         return {
             "total_demand_coverage": total_demand_coverage,
             "total_coverage_percentage": total_coverage_percentage,
@@ -81,6 +94,7 @@ def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_b
     else:
         print("No optimal solution found.")
         return None
+
 
 
 
@@ -93,6 +107,7 @@ with open("./data/georgia_processed_data/georgia_processed_data.pkl", "rb") as f
     loaded_data = pickle.load(f)
 
 c = loaded_data['areas_demand']  # Area demand
+tr = loaded_data['trips']
 previous_built_stations = {}
 try:
     with open("./data/model_output/built_stations.pkl", "rb") as f:
@@ -110,11 +125,11 @@ BUDGET = 100 * MILLION
 COST = 300000 # of a charger
 
 # budgets = range(150, 351, 100) # in millions of $
-budgets = [50, 100, 300, 700, 1500] # in millions of $
+budgets = [1500, 3000, 4500] # in millions of $
 charger_amounts = [int(budget * MILLION / COST) for budget in budgets]
 
 # CHARGERS_BUDGET_LIMIT = 1500
-CAP_SPOT = 50000              
+CAP_SPOT = 100000              
 MAX_CHARGERS = 120
 
 # Placeholder for results
@@ -133,6 +148,7 @@ for charger_amount_budget in charger_amounts:
         chargers_budget_limit=charger_amount_budget,
         previous_built_stations=previous_built_stations,
         area_demand=c,  # Pass demand data
+        trips=tr  # Pass trips data
     )
     if result:
         results.append({
