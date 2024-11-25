@@ -83,7 +83,6 @@ model.setObjective(quicksum(z[j] * c[j] for j in A), GRB.MAXIMIZE)
 for i in P:
     model.addConstr(quicksum(served[i, j] for j in A) <= build[i] * CAP_SPOT, name=f"capacity_constraint_{i}")
 
-# Prioritize local demand fulfillment for each station
 for i in P:
     if i in A:  # Ensure the station `i` has its own area
         model.addConstr(served[i, i] <= build[i] * CAP_SPOT, name=f"local_capacity_limit_{i}")
