@@ -44,7 +44,14 @@ tr = loaded_data['trips']
 # -------------------------------------------------------------------------------------------- 
 # -------------------------------------------------------------------------------------------- 
 # ---------------------------- PARAMETERS ----------------------------------------------------
-CHARGERS_BUDGET_LIMIT = 3500
+# MILLION = 1000000
+# BUDGET = 100 * MILLION
+# COST = 150000 # of a charger
+
+# budgets = range(150, 351, 100) # in millions of $
+# charger_amounts = [int(budget * MILLION / COST) for budget in budgets]
+# charger_amounts = [1000]
+CHARGERS_BUDGET_LIMIT = 7500
 CAP_SPOT = 35294              
 MAX_CHARGERS = 60
 
@@ -70,7 +77,8 @@ is_built = model.addVars(P, vtype=GRB.BINARY, name="is_built") # Binary Auxiliar
 # Objective: Maximize the total effective coverage across all areas
 model.setObjective(quicksum(z[j] * c[j] for j in A), GRB.MAXIMIZE)
 
-# Constraints
+
+# CONSTRAINTS
 # Capacity constraint: Total trips served from site i to all areas cannot exceed the capacity from installed chargers
 for i in P:
     model.addConstr(quicksum(served[i, j] for j in A) <= build[i] * CAP_SPOT, name=f"capacity_constraint_{i}")
@@ -78,20 +86,10 @@ for i in P:
 # Prioritize local demand fulfillment for each station
 for i in P:
     if i in A:  # Ensure the station `i` has its own area
-        # Add binary variable to decide between demand and capacity
-        is_capacity_limited = model.addVar(vtype=GRB.BINARY, name=f"is_capacity_limited_{i}")
-        
-        # If the station's capacity is smaller than the area's demand
         model.addConstr(served[i, i] <= build[i] * CAP_SPOT, name=f"local_capacity_limit_{i}")
-        
-        # If the area's demand is smaller, fulfill it entirely
         model.addConstr(served[i, i] <= c[i], name=f"local_demand_limit_{i}")
-        
-        # Logic for binary variable: either satisfy capacity or demand
-        model.addConstr(
-            served[i, i] == is_capacity_limited * (build[i] * CAP_SPOT) + (1 - is_capacity_limited) * c[i],
-            name=f"local_demand_served_{i}"
-        )
+        remaining_capacity = build[i] * CAP_SPOT - served[i, i]
+        model.addConstr(quicksum(served[i, j] for j in A if j != i) <= remaining_capacity, name=f"remaining_capacity_constraint_{i}")
 
 # Trip limit constraint: Trips served from site i to area j cannot exceed the actual trips
 for i, j in tr:
@@ -107,15 +105,20 @@ for j in P:
 
 # Saturation constraint: z[j] is the minimum of saturation_raw[j] and 1
 for j in A:
-    if j in P:  # If area j has a potential station site
-        model.addGenConstrIndicator(is_built[j], True, z[j] == 1, name=f"station_is_in_the_area_{j}")
-    model.addGenConstrMin(z[j], [saturation_raw[j], 1], name=f"min_constraint_{j}")
+        model.addGenConstrMin(z[j], [saturation_raw[j], 1], name=f"min_constraint_{j}")
 
 # Budget constraint: Limit the total number of chargers built across all sites to chargers_budget_limit
 model.addConstr(quicksum(build[i] for i in P) <= CHARGERS_BUDGET_LIMIT, name="chargers_budget_limit")
 
+
+
 # Save model in MPS format for warm start
 model.write("./data/model_output/saved_model.mps")  
+
+# stop at objective conf.interval of N%
+model.setParam('MIPGap', 0.05)
+model.setParam('TimeLimit', 300)  # Stop after 300 seconds
+
 
 # Optimize the model
 model.optimize()
@@ -128,7 +131,21 @@ model.optimize()
 # ---------------------------- OUTPUT PRINT --------------------------------------------------
 
 # Display results in the requested format
-if model.status == GRB.OPTIMAL:
+if model.status in [gp.GRB.OPTIMAL, gp.GRB.SUBOPTIMAL]:
+    print("Parameters given:")
+    print("CHARGERS_BUDGET_LIMIT:", CHARGERS_BUDGET_LIMIT)
+    print("CAP_SPOT:", CAP_SPOT)
+    print("MAX_CHARGERS:", MAX_CHARGERS)
+    print()
+
+    print(f"Solution found with gap: {model.MIPGap * 100:.2f}%")
+    print(f"Objective value: {model.ObjVal}")
+
+    budget_constraint = model.getConstrByName("chargers_budget_limit")
+    slack = budget_constraint.Slack
+    print(f"Budget constraint slack: {slack}")
+    print()
+
     total_demand = sum(c[j] for j in A)
     total_demand_covered = sum(min(saturation_raw[j].x * c[j], c[j]) for j in A)
     total_demand_covered_percent = (total_demand_covered / total_demand) * 100 if total_demand > 0 else 0

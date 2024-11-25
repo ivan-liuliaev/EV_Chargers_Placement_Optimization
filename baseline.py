@@ -36,8 +36,8 @@ P = loaded_data['potential_sites']
 c = loaded_data['areas_demand']
 tr = loaded_data['trips']
 
-CHARGERS_BUDGET_LIMIT = 3500
-CAP_SPOT = 35294              
+CHARGERS_BUDGET_LIMIT = 1500
+CAP_SPOT = 200000              
 MAX_CHARGERS = 60
 
 
