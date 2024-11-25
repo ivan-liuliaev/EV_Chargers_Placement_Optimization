@@ -112,17 +112,17 @@ except FileNotFoundError:
 # MAX_CHARGERS = 60
 
 MILLION = 1000000
-BUDGET = 100 * MILLION
+# BUDGET = 100 * MILLION
 COST = 300000 # of a charger
 
-budgets = range(10, 50, 10) # in millions of $
+budgets = range(10, 240, 10) # in millions of $
 # budgets = [10, 3000, 4500] # in millions of $
-# charger_amounts = [int(budget * MILLION / COST) for budget in budgets]
-charger_amounts = [1, 10, 250, 500, 550, 600, 650]
+charger_amounts = [int(budget * MILLION / COST) for budget in budgets]
+# charger_amounts = [1, 10, 250, 500, 550, 600, 650]
 # charger_amounts = range(200, 1000, 500)
 
 # CHARGERS_BUDGET_LIMIT = 1500
-# CAP_SPOT = 400000        # DOESNT UPDATE!!!    I removed the code  , only updates when model.py updates it
+CAP_SPOT = 400000        # DOESNT UPDATE!!!    I removed the code  , only updates when model.py updates it
 MAX_CHARGERS = 10
 
 # Placeholder for results

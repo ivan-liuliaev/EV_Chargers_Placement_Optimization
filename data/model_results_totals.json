@@ -1,18 +1,73 @@
 [
     {
-        "budget": 1,
-        "total_demand_coverage": 499708.5346683319,
-        "total_coverage_percentage": 0.14400705210066905
+        "budget": 33,
+        "total_demand_coverage": 16500000.000000004,
+        "total_coverage_percentage": 4.755004557282824
     },
     {
-        "budget": 10,
-        "total_demand_coverage": 5000000.0,
-        "total_coverage_percentage": 1.4409104719038854
+        "budget": 66,
+        "total_demand_coverage": 32999999.999999993,
+        "total_coverage_percentage": 9.510009114565642
     },
     {
-        "budget": 250,
-        "total_demand_coverage": 119314638.50747302,
-        "total_coverage_percentage": 34.3843424153689
+        "budget": 100,
+        "total_demand_coverage": 49999999.999999985,
+        "total_coverage_percentage": 14.40910471903885
+    },
+    {
+        "budget": 133,
+        "total_demand_coverage": 65391300.28276421,
+        "total_coverage_percentage": 18.844601869769292
+    },
+    {
+        "budget": 166,
+        "total_demand_coverage": 81857137.99577741,
+        "total_coverage_percentage": 23.589761467639423
+    },
+    {
+        "budget": 200,
+        "total_demand_coverage": 96089094.8956782,
+        "total_coverage_percentage": 27.691156614189786
+    },
+    {
+        "budget": 233,
+        "total_demand_coverage": 110592246.0833234,
+        "total_coverage_percentage": 31.870705098566432
+    },
+    {
+        "budget": 266,
+        "total_demand_coverage": 124371685.57713783,
+        "total_coverage_percentage": 35.84169283128707
+    },
+    {
+        "budget": 300,
+        "total_demand_coverage": 137053710.54560027,
+        "total_coverage_percentage": 39.49642534768788
+    },
+    {
+        "budget": 333,
+        "total_demand_coverage": 149177194.87152466,
+        "total_coverage_percentage": 42.9901964519253
+    },
+    {
+        "budget": 366,
+        "total_demand_coverage": 158942881.49682656,
+        "total_coverage_percentage": 45.80449247667114
+    },
+    {
+        "budget": 400,
+        "total_demand_coverage": 168138861.72650585,
+        "total_coverage_percentage": 48.45460931914434
+    },
+    {
+        "budget": 433,
+        "total_demand_coverage": 173896399.73360035,
+        "total_coverage_percentage": 50.113828680505755
+    },
+    {
+        "budget": 466,
+        "total_demand_coverage": 182191272.35245103,
+        "total_coverage_percentage": 52.50426244442791
     },
     {
         "budget": 500,
@@ -20,9 +75,14 @@
         "total_coverage_percentage": 54.66311695305583
     },
     {
-        "budget": 550,
-        "total_demand_coverage": 197959778.574487,
-        "total_coverage_percentage": 57.04846359275055
+        "budget": 533,
+        "total_demand_coverage": 195541512.29481325,
+        "total_coverage_percentage": 56.351562551503754
+    },
+    {
+        "budget": 566,
+        "total_demand_coverage": 195346170.00663418,
+        "total_coverage_percentage": 56.295268401775175
     },
     {
         "budget": 600,
@@ -30,8 +90,28 @@
         "total_coverage_percentage": 57.67525649904031
     },
     {
-        "budget": 650,
-        "total_demand_coverage": 204448018.50012648,
-        "total_coverage_percentage": 58.91825816336631
+        "budget": 633,
+        "total_demand_coverage": 204099897.83763492,
+        "total_coverage_percentage": 58.817936021752274
+    },
+    {
+        "budget": 666,
+        "total_demand_coverage": 210209972.6431682,
+        "total_coverage_percentage": 60.57875017603408
+    },
+    {
+        "budget": 700,
+        "total_demand_coverage": 211596941.18505347,
+        "total_coverage_percentage": 60.978449675274824
+    },
+    {
+        "budget": 733,
+        "total_demand_coverage": 215371862.46210447,
+        "total_coverage_percentage": 62.06631439501794
+    },
+    {
+        "budget": 766,
+        "total_demand_coverage": 216954965.85827318,
+        "total_coverage_percentage": 62.52253644734716
     }
 ]
