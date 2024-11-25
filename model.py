@@ -51,9 +51,9 @@ tr = loaded_data['trips']
 # budgets = range(150, 351, 100) # in millions of $
 # charger_amounts = [int(budget * MILLION / COST) for budget in budgets]
 # charger_amounts = [1000]
-CHARGERS_BUDGET_LIMIT = 1500
-CAP_SPOT = 200000              
-MAX_CHARGERS = 60
+CHARGERS_BUDGET_LIMIT = 4000
+CAP_SPOT = 100000              
+MAX_CHARGERS = 120
 
 
 
@@ -83,13 +83,13 @@ model.setObjective(quicksum(z[j] * c[j] for j in A), GRB.MAXIMIZE)
 for i in P:
     model.addConstr(quicksum(served[i, j] for j in A) <= build[i] * CAP_SPOT, name=f"capacity_constraint_{i}")
 
-# Local demand constraint (doesnt fully functional rn)
-for i in P:
-    if i in A:  # Ensure the station `i` has its own area
-        model.addConstr(served[i, i] <= build[i] * CAP_SPOT, name=f"local_capacity_limit_{i}")
-        model.addConstr(served[i, i] <= c[i], name=f"local_demand_limit_{i}")
-        remaining_capacity = build[i] * CAP_SPOT - served[i, i]
-        model.addConstr(quicksum(served[i, j] for j in A if j != i) <= remaining_capacity, name=f"remaining_capacity_constraint_{i}")
+# # Local demand constraint (doesnt do it job properly, but still should work)
+# for i in P:
+#     if i in A:  # Ensure the station `i` has its own area
+#         model.addConstr(served[i, i] <= build[i] * CAP_SPOT, name=f"local_capacity_limit_{i}")
+#         model.addConstr(served[i, i] <= c[i], name=f"local_demand_limit_{i}")
+#         remaining_capacity = build[i] * CAP_SPOT - served[i, i]
+#         model.addConstr(quicksum(served[i, j] for j in A if j != i) <= remaining_capacity, name=f"remaining_capacity_constraint_{i}")
 
 # Trip limit constraint: Trips served from site i to area j cannot exceed the actual trips
 for i, j in tr:

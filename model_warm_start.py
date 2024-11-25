@@ -51,6 +51,11 @@ def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_b
         print(f"Solution found with gap: {model.MIPGap * 100:.2f}%")
         print(f"Objective value: {model.ObjVal}")
 
+        print("Parameters given:")
+        print("CHARGERS_BUDGET_LIMIT:", chargers_budget_limit)
+        print("CAP_SPOT:", cap_spot)
+        print("MAX_CHARGERS:", max_chargers)
+
         budget_constraint = model.getConstrByName("chargers_budget_limit")
         slack = budget_constraint.Slack
         print(f"Budget constraint slack: {slack}")
@@ -102,20 +107,21 @@ except FileNotFoundError:
 
 MILLION = 1000000
 BUDGET = 100 * MILLION
-COST = 150000 # of a charger
+COST = 300000 # of a charger
 
-budgets = range(150, 351, 100) # in millions of $
+# budgets = range(150, 351, 100) # in millions of $
+budgets = [50, 100, 300, 700, 1500] # in millions of $
 charger_amounts = [int(budget * MILLION / COST) for budget in budgets]
 
 # CHARGERS_BUDGET_LIMIT = 1500
-CAP_SPOT = 200000              
-MAX_CHARGERS = 60
+CAP_SPOT = 50000              
+MAX_CHARGERS = 120
 
 # Placeholder for results
 results = []
 
 # Solve the model for each budget
-for charger_amount_budget in [1500]:
+for charger_amount_budget in charger_amounts:
     print(f"\n--- Running for Budget (in millions of $) = {charger_amount_budget * COST / MILLION} ---")
     print(f"--- Chargers: {charger_amount_budget} ---")
 
