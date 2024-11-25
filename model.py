@@ -51,9 +51,9 @@ tr = loaded_data['trips']
 # budgets = range(150, 351, 100) # in millions of $
 # charger_amounts = [int(budget * MILLION / COST) for budget in budgets]
 # charger_amounts = [1000]
-CHARGERS_BUDGET_LIMIT = 4000
-CAP_SPOT = 100000              
-MAX_CHARGERS = 120
+CHARGERS_BUDGET_LIMIT = 1
+CAP_SPOT = 500000              
+MAX_CHARGERS = 30
 
 
 
@@ -163,7 +163,7 @@ if model.status in [gp.GRB.OPTIMAL, gp.GRB.SUBOPTIMAL]:
     total_demand_covered_percent = (total_demand_covered / total_demand) * 100 if total_demand > 0 else 0
 
     print(f"Total demand: {total_demand:.2f}")
-    print(f"Total demand covered: {total_demand_covered:.2f}")
+    print(f"Total demand covered (in MM): {total_demand_covered / 1000000:.2f}")
     print(f"Total demand covered (percent): \033[1;31m{total_demand_covered_percent:.2f}%\033[0m\n")
 
     fully_covered_areas = [j for j in A if saturation_raw[j].x >= 1]

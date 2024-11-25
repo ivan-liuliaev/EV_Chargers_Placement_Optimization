@@ -36,9 +36,9 @@ P = loaded_data['potential_sites']
 c = loaded_data['areas_demand']
 tr = loaded_data['trips']
 
-CHARGERS_BUDGET_LIMIT = 1500
-CAP_SPOT = 200000              
-MAX_CHARGERS = 60
+CHARGERS_BUDGET_LIMIT = 2000
+CAP_SPOT = 100000              
+MAX_CHARGERS = 120
 
 
 # -------------------------------------------------------------------------------------------- 
@@ -88,9 +88,15 @@ total_demand = sum(c[j] for j in A)
 demand_covered = sum(min(area_served_trips[j], c[j]) for j in A)
 total_demand_covered_percent = (demand_covered / total_demand) * 100 if total_demand > 0 else 0
 
+
+
 print(f"Total demand: {total_demand:.2f}")
 print(f"Total demand covered: {demand_covered:.2f}")
-print(f"Total demand covered (percent): {total_demand_covered_percent:.2f}%\n")
+print(f"Total Demand Coverage Percentage: \033[1;31m{total_demand_covered_percent:.2f}%\033[0m")
+print("Parameters given:")
+print("CHARGERS_BUDGET_LIMIT:", CHARGERS_BUDGET_LIMIT)
+print("CAP_SPOT:", CAP_SPOT)
+print("MAX_CHARGERS:", MAX_CHARGERS)
 
 # Fully covered areas
 fully_covered_areas = [j for j in A if area_served_trips[j] >= c[j]]

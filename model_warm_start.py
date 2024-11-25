@@ -4,7 +4,8 @@ import gurobipy as gp
 import time
 
 
-def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_budget_limit, previous_built_stations, area_demand, trips):
+def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_budget_limit, previous_built_stations, area_demand):
+
     model.reset()
     
     # Update MAX_CHARGERS
@@ -13,24 +14,13 @@ def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_b
             j.UB = max_chargers  # Update upper bound for chargers at each site
             site = int(j.VarName.split("[")[1].rstrip("]"))
             j.LB = previous_built_stations.get(site, 0)  # Set lower bound to previous built chargers
-    
-    # Remove and rebuild capacity constraints
-    for constr in model.getConstrs():
-        if constr.ConstrName.startswith("capacity_constraint_"):
-            model.remove(constr)  # Remove the old constraint
-    
-    model.update()  # Ensure the model reflects constraint removal
 
-    # Rebuild updated capacity constraints
-    for i in previous_built_stations.keys():
-        trips_from_i = [j for (i_prime, j) in trips.keys() if i_prime == i]
-        model.addConstr(
-            gp.quicksum(model.getVarByName(f"served[{i},{j}]") for j in trips_from_i) <= cap_spot * model.getVarByName(f"build[{i}]"),
-            name=f"capacity_constraint_{i}"
-        )
 
     # Update budget limit
     model.getConstrByName("chargers_budget_limit").RHS = chargers_budget_limit
+
+    # Ensure updates are applied
+    model.update()
 
     # Apply warm start
     for var in model.getVars():
@@ -83,7 +73,7 @@ def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_b
 
 
         total_coverage_percentage = (total_demand_coverage / total_demand) * 100 if total_demand > 0 else 0
-        print(f"Total Demand Coverage: {total_demand_coverage:.2f}%)")
+        print(f"Total Demand Coverage (in Millions): {total_demand_coverage/MILLION:.2f}")
         print(f"Total Demand Coverage Percentage: \033[1;31m{total_coverage_percentage:.2f}%\033[0m")
 
         return {
@@ -108,6 +98,7 @@ with open("./data/georgia_processed_data/georgia_processed_data.pkl", "rb") as f
 
 c = loaded_data['areas_demand']  # Area demand
 tr = loaded_data['trips']
+P = loaded_data['potential_sites']
 previous_built_stations = {}
 try:
     with open("./data/model_output/built_stations.pkl", "rb") as f:
@@ -124,13 +115,15 @@ MILLION = 1000000
 BUDGET = 100 * MILLION
 COST = 300000 # of a charger
 
-# budgets = range(150, 351, 100) # in millions of $
-budgets = [1500, 3000, 4500] # in millions of $
-charger_amounts = [int(budget * MILLION / COST) for budget in budgets]
+budgets = range(10, 50, 10) # in millions of $
+# budgets = [10, 3000, 4500] # in millions of $
+# charger_amounts = [int(budget * MILLION / COST) for budget in budgets]
+charger_amounts = [1, 10, 250, 500, 550, 600, 650]
+# charger_amounts = range(200, 1000, 500)
 
 # CHARGERS_BUDGET_LIMIT = 1500
-CAP_SPOT = 100000              
-MAX_CHARGERS = 120
+# CAP_SPOT = 400000        # DOESNT UPDATE!!!    I removed the code  , only updates when model.py updates it
+MAX_CHARGERS = 10
 
 # Placeholder for results
 results = []
@@ -147,9 +140,9 @@ for charger_amount_budget in charger_amounts:
         max_chargers=MAX_CHARGERS,
         chargers_budget_limit=charger_amount_budget,
         previous_built_stations=previous_built_stations,
-        area_demand=c,  # Pass demand data
-        trips=tr  # Pass trips data
+        area_demand=c
     )
+
     if result:
         results.append({
             "budget": charger_amount_budget,

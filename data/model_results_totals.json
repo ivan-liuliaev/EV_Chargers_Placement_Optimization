@@ -1,17 +1,37 @@
 [
     {
-        "budget": 5000,
-        "total_demand_coverage": 217045491.801481,
-        "total_coverage_percentage": 62.54862440325658
+        "budget": 1,
+        "total_demand_coverage": 499708.5346683319,
+        "total_coverage_percentage": 0.14400705210066905
     },
     {
-        "budget": 10000,
-        "total_demand_coverage": 217045491.801481,
-        "total_coverage_percentage": 62.54862440325658
+        "budget": 10,
+        "total_demand_coverage": 5000000.0,
+        "total_coverage_percentage": 1.4409104719038854
     },
     {
-        "budget": 15000,
-        "total_demand_coverage": 217045491.801481,
-        "total_coverage_percentage": 62.54862440325658
+        "budget": 250,
+        "total_demand_coverage": 119314638.50747302,
+        "total_coverage_percentage": 34.3843424153689
+    },
+    {
+        "budget": 500,
+        "total_demand_coverage": 189682558.42026412,
+        "total_coverage_percentage": 54.66311695305583
+    },
+    {
+        "budget": 550,
+        "total_demand_coverage": 197959778.574487,
+        "total_coverage_percentage": 57.04846359275055
+    },
+    {
+        "budget": 600,
+        "total_demand_coverage": 200134767.64740825,
+        "total_coverage_percentage": 57.67525649904031
+    },
+    {
+        "budget": 650,
+        "total_demand_coverage": 204448018.50012648,
+        "total_coverage_percentage": 58.91825816336631
     }
 ]
