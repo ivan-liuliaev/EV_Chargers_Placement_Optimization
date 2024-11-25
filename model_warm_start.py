@@ -107,14 +107,15 @@ COST = 150000 # of a charger
 budgets = range(150, 351, 100) # in millions of $
 charger_amounts = [int(budget * MILLION / COST) for budget in budgets]
 
+# CHARGERS_BUDGET_LIMIT = 1500
 CAP_SPOT = 200000              
-MAX_CHARGERS = 30
+MAX_CHARGERS = 60
 
 # Placeholder for results
 results = []
 
 # Solve the model for each budget
-for charger_amount_budget in [750, 950, 1250, 1500]:
+for charger_amount_budget in [1500]:
     print(f"\n--- Running for Budget (in millions of $) = {charger_amount_budget * COST / MILLION} ---")
     print(f"--- Chargers: {charger_amount_budget} ---")
 

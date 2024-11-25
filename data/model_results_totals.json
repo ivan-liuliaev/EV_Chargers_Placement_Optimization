@@ -1,22 +1,7 @@
 [
     {
-        "budget": 750,
-        "total_demand_coverage": 114734888.17063282,
-        "total_coverage_percentage": 33.064540371557214
-    },
-    {
-        "budget": 950,
-        "total_demand_coverage": 116346324.77263275,
-        "total_coverage_percentage": 33.528927546483395
-    },
-    {
-        "budget": 1250,
-        "total_demand_coverage": 116346324.77263275,
-        "total_coverage_percentage": 33.528927546483395
-    },
-    {
         "budget": 1500,
-        "total_demand_coverage": 116346324.77263275,
-        "total_coverage_percentage": 33.528927546483395
+        "total_demand_coverage": 211323197.94716543,
+        "total_coverage_percentage": 60.89956177565767
     }
 ]
