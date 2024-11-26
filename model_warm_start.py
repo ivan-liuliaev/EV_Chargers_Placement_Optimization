@@ -3,33 +3,31 @@ import json
 import gurobipy as gp
 import time
 
-
-def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_budget_limit, previous_built_stations, area_demand):
+def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, budget, previous_built_stations, area_demand, station_cost, charger_cost):
 
     model.reset()
     
-    # Update MAX_CHARGERS
-    for j in model.getVars():
-        if j.VarName.startswith("build["):
-            j.UB = max_chargers  # Update upper bound for chargers at each site
-            site = int(j.VarName.split("[")[1].rstrip("]"))
-            j.LB = previous_built_stations.get(site, 0)  # Set lower bound to previous built chargers
-
-
-    # Update budget limit
-    model.getConstrByName("chargers_budget_limit").RHS = chargers_budget_limit
-
-    # Ensure updates are applied
-    model.update()
-
-    # Apply warm start
+    # Update MAX_CHARGERS and apply warm start for 'build' variables
     for var in model.getVars():
         if var.VarName.startswith("build["):
             site = int(var.VarName.split("[")[1].rstrip("]"))
-            var.Start = previous_built_stations.get(site, 0)
+            var.UB = max_chargers  # Update upper bound for chargers at each site
+            var.LB = previous_built_stations.get(site, 0)  # Set lower bound to previous built chargers
+            var.Start = previous_built_stations.get(site, 0)  # Warm start for 'build' variables
+
+    # Apply warm start for 'is_built' variables
+    for var in model.getVars():
+        if var.VarName.startswith("is_built["):
+            site = int(var.VarName.split("[")[1].rstrip("]"))
+            var.Start = 1 if previous_built_stations.get(site, 0) > 0 else 0
+
     print("Warm start applied.")
 
-    # Update the model to apply changes
+    # Update budget constraint RHS
+    budget_constraint = model.getConstrByName("budget_constraint")
+    budget_constraint.RHS = budget
+
+    # Ensure updates are applied
     model.update()
 
     # ---------------------------- RESOLVE THE MODEL ---------------------------------------
@@ -54,12 +52,16 @@ def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_b
         print(f"Objective value: {model.ObjVal}")
 
         print("Parameters given:")
-        print("CHARGERS_BUDGET_LIMIT:", chargers_budget_limit)
-        print("CAP_SPOT:", cap_spot)
+        print("BUDGET:", budget)
+        print("STATION_COST:", station_cost)
+        print("CHARGER_COST:", charger_cost)
+        # print("CAP_SPOT:", cap_spot)
         print("MAX_CHARGERS:", max_chargers)
 
-        budget_constraint = model.getConstrByName("chargers_budget_limit")
+        budget_constraint = model.getConstrByName("budget_constraint")
         slack = budget_constraint.Slack
+        total_cost_used = budget - slack
+        print(f"Total cost used: {total_cost_used}")
         print(f"Budget constraint slack: {slack}")
 
         total_demand_coverage = 0
@@ -71,7 +73,6 @@ def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_b
                     coverage = min(var.X * area_demand[area_id], area_demand[area_id])
                     total_demand_coverage += coverage
 
-
         total_coverage_percentage = (total_demand_coverage / total_demand) * 100 if total_demand > 0 else 0
         print(f"Total Demand Coverage (in Millions): {total_demand_coverage/MILLION:.2f}")
         print(f"Total Demand Coverage Percentage: \033[1;31m{total_coverage_percentage:.2f}%\033[0m")
@@ -79,14 +80,12 @@ def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, chargers_b
         return {
             "total_demand_coverage": total_demand_coverage,
             "total_coverage_percentage": total_coverage_percentage,
-            "objective": model.ObjVal
+            "objective": model.ObjVal,
+            "total_cost_used": total_cost_used
         }
     else:
         print("No optimal solution found.")
         return None
-
-
-
 
 # Load the model once
 model = gp.read("./data/model_output/saved_model.mps")
@@ -107,52 +106,47 @@ except FileNotFoundError:
     print("No previous solution found. Starting fresh.")
 
 # Define hyperparameter combinations
-# CHARGERS_BUDGET_LIMIT = 3500
-# CAP_SPOT = 35294              
-# MAX_CHARGERS = 60
-
 MILLION = 1000000
-# BUDGET = 100 * MILLION
-COST = 300000 # of a charger
+STATION_COST = 250000 # CAP_SPOT does not update automoatically, only after model.py rerun
+CHARGER_COST = 50000 # CAP_SPOT does not update automoatically, only after model.py rerun
 
-budgets = range(10, 240, 10) # in millions of $
-# budgets = [10, 3000, 4500] # in millions of $
-charger_amounts = [int(budget * MILLION / COST) for budget in budgets]
-# charger_amounts = [1, 10, 250, 500, 550, 600, 650]
-# charger_amounts = range(200, 1000, 500)
+budgets = range(4 * MILLION, 41 * MILLION, 4 * MILLION)  # Budgets in dollars
+# Convert budgets to list
+budgets = list(budgets)
 
-# CHARGERS_BUDGET_LIMIT = 1500
-CAP_SPOT = 400000        # DOESNT UPDATE!!!    I removed the code  , only updates when model.py updates it
-MAX_CHARGERS = 10
+CAP_SPOT = 50000  # CAP_SPOT does not update automoatically, only after model.py rerun
+MAX_CHARGERS = 30  # Update MAX_CHARGERS if necessary
 
 # Placeholder for results
 results = []
 
 # Solve the model for each budget
-for charger_amount_budget in charger_amounts:
-    print(f"\n--- Running for Budget (in millions of $) = {charger_amount_budget * COST / MILLION} ---")
-    print(f"--- Chargers: {charger_amount_budget} ---")
+for budget in budgets:
+    print(f"\n--- Running for Budget (in millions of $) = {budget / MILLION} ---")
 
     model.reset()
     result = resolve_model_with_hyperparameters(
         model=model,
         cap_spot=CAP_SPOT,
         max_chargers=MAX_CHARGERS,
-        chargers_budget_limit=charger_amount_budget,
+        budget=budget,
         previous_built_stations=previous_built_stations,
-        area_demand=c
+        area_demand=c,
+        station_cost=STATION_COST,
+        charger_cost=CHARGER_COST
     )
 
     if result:
         results.append({
-            "budget": charger_amount_budget,
+            "budget": budget,
+            "total_cost_used": result["total_cost_used"],
             "total_demand_coverage": result["total_demand_coverage"],
             "total_coverage_percentage": result["total_coverage_percentage"]
         })
-        print(f"Accumulated Result: Budget={charger_amount_budget}, Total Demand Coverage={result['total_demand_coverage']:.2f}, "
+        print(f"Accumulated Result: Budget={budget / MILLION}M, Total Demand Coverage={result['total_demand_coverage']:.2f}, "
               f"Percentage={result['total_coverage_percentage']:.2f}%")
     else:
-        print(f"Failed to find optimal solution for Budget={charger_amount_budget}.")
+        print(f"Failed to find optimal solution for Budget={budget / MILLION}M.")
 
 # Export results to a JSON file
 output_file = "./data/model_results_totals.json"
