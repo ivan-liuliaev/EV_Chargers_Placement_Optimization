@@ -107,10 +107,11 @@ except FileNotFoundError:
 
 # Define hyperparameter combinations
 MILLION = 1000000
-STATION_COST = 250000 # CAP_SPOT does not update automoatically, only after model.py rerun
-CHARGER_COST = 50000 # CAP_SPOT does not update automoatically, only after model.py rerun
+STATION_COST = 250000 # does not update automoatically, only after model.py rerun
+CHARGER_COST = 50000 # does not update automoatically, only after model.py rerun
 
-budgets = range(4 * MILLION, 41 * MILLION, 4 * MILLION)  # Budgets in dollars
+# adjustable, update automatically
+budgets = range(35 * MILLION, 85 * MILLION, 5 * MILLION)  # Budgets in dollars
 # Convert budgets to list
 budgets = list(budgets)
 
