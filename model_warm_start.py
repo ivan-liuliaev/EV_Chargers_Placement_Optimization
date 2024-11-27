@@ -149,9 +149,10 @@ for budget in budgets:
     else:
         print(f"Failed to find optimal solution for Budget={budget / MILLION}M.")
 
-# Export results to a JSON file
-output_file = "./data/model_results_totals.json"
-with open(output_file, "w") as f:
-    json.dump(results, f, indent=4)
+# # Export results to a JSON file
+# output_file = "./data/model_results_totals.json"
+# with open(output_file, "w") as f:
+#     json.dump(results, f, indent=4)
 
-print(f"\nResults saved to {output_file}")
+# print(f"\nResults saved to {output_file}")
+print(f"\n RESULTS NOT SAVED")
