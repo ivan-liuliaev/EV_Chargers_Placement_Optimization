@@ -42,7 +42,7 @@ tr = loaded_data['trips']
 # -------------------------------------------------------------------------------------------- 
 # ---------------------------- PARAMETERS ----------------------------------------------------
 MILLION = 1000000
-BUDGET = 35 * MILLION       # Total budget of $10 million
+BUDGET = 95 * MILLION       # Total budget of $10 million
 STATION_COST = 250000       # $250k per station
 CHARGER_COST = 50000        # $50k per charger
 CAP_SPOT = 500000           # Each charging spot serves up to 500,000 trips
@@ -144,7 +144,7 @@ if model.status in [gp.GRB.OPTIMAL, gp.GRB.SUBOPTIMAL]:
     total_demand_covered = sum(min(saturation_raw[j].x * c[j], c[j]) for j in A)
     total_demand_covered_percent = (total_demand_covered / total_demand) * 100 if total_demand > 0 else 0
 
-    print(f"Total demand: {total_demand:.2f}")
+    print(f"Total demand (in MM): {total_demand  / 1000000:.2f}")
     print(f"Total demand covered (in MM): {total_demand_covered / 1000000:.2f}")
     print(f"Total demand covered (percent): \033[1;31m{total_demand_covered_percent:.2f}%\033[0m\n")
 
@@ -187,8 +187,8 @@ if model.status in [gp.GRB.OPTIMAL, gp.GRB.SUBOPTIMAL]:
     print(f"  Total areas demand: {not_covered_total_demand:.2f}")
 
     # Additional Output: Total number of stations and chargers built
-    stations_built = sum(is_built[i].x for i in P)
     total_chargers_built = sum(build[i].x for i in P)
+    stations_built = len([True for i in P if build[i].x >= 1])
     print(f"\nTotal number of stations built: {stations_built}")
     print(f"Total number of chargers built: {total_chargers_built}")
 

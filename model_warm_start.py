@@ -34,8 +34,8 @@ def resolve_model_with_hyperparameters(model, cap_spot, max_chargers, budget, pr
     # Turn off Gurobi logging
     model.setParam('OutputFlag', 0)
 
-    # Stop at objective confidence interval of 5%
-    model.setParam('MIPGap', 0.05)
+    # Stop at objective confidence interval of n%
+    model.setParam('MIPGap', 0.025)
     model.setParam('TimeLimit', 200)  # Stop after 200 seconds
     
     print(f"Resolving the model...")
@@ -111,11 +111,11 @@ STATION_COST = 250000 # does not update automoatically, only after model.py reru
 CHARGER_COST = 50000 # does not update automoatically, only after model.py rerun
 
 # adjustable, update automatically
-budgets = range(35 * MILLION, 85 * MILLION, 5 * MILLION)  # Budgets in dollars
+budgets = range(10 * MILLION, 111 * MILLION, 10 * MILLION)  # Budgets in dollars
 # Convert budgets to list
 budgets = list(budgets)
 
-CAP_SPOT = 50000  # CAP_SPOT does not update automoatically, only after model.py rerun
+CAP_SPOT = 500000  # CAP_SPOT does not update automoatically, only after model.py rerun
 MAX_CHARGERS = 30  # Update MAX_CHARGERS if necessary
 
 # Placeholder for results
