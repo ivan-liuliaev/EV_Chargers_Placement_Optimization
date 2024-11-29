@@ -23,9 +23,9 @@
 
 ## Problem statement
 
-> **Come up with optimal locations for EV charging stations within the state of Georgia 👍**
+#### Come up with optimal locations for EV charging stations within the state of Georgia 👍
 
-##### Factors to consider
+#### Factors to consider
 
 * population density
 * traffic patterns
