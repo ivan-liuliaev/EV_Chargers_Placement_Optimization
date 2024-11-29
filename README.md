@@ -9,11 +9,6 @@
 ![](assets/20241129_183623_graphs.png)
 
 ## Insights
-
-```
-<a name="Insights"></a>
-```
-
 * n% better than baseline
 * n amount of money in potential savings
 * m is the optimal budget that maximizes profit
