@@ -42,7 +42,7 @@ tr = loaded_data['trips']
 # -------------------------------------------------------------------------------------------- 
 # ---------------------------- PARAMETERS ----------------------------------------------------
 MILLION = 1000000
-BUDGET = 95 * MILLION       # Total budget of $10 million
+BUDGET = 60 * MILLION       # Total budget
 STATION_COST = 250000       # $250k per station
 CHARGER_COST = 50000        # $50k per charger
 CAP_SPOT = 500000           # Each charging spot serves up to 500,000 trips
@@ -203,7 +203,7 @@ else:
 # Extract data about stations built and chargers
 if model.status == GRB.OPTIMAL:
     built_stations = {j: build[j].x for j in P if build[j].x > 0}  # Only include sites where chargers are built
-    coverage_percentages = {j: saturation_raw[j].x * 100 for j in A}  # Calculate coverage as a percentage
+    coverage_percentages = {j: z[j].x * 100 for j in A}  # Calculate coverage as a percentage
 
     # Export built stations and chargers to a pickle file
     with open("./data/model_output/built_stations.pkl", "wb") as f:
