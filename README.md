@@ -1,4 +1,11 @@
+# Report
 
-![[Untitled design-2.jpg]]
+##### Placement
 
-![[Screenshot 2024-11-29 at 6.27.38 PM.png]]
+![](assets/20241129_183434_Untitled_design-2.jpg)
+
+
+
+##### Optimization
+
+![](assets/20241129_183623_graphs.png)
