@@ -8,11 +8,11 @@
 
 ![](assets/20241129_183623_graphs.png)
 
-## Insights
+## Results summary
 
-* n% better than baseline
-* n amount of money in potential savings
-* m is the optimal budget that maximizes profit
+* The model demonstrates <span style="color: green;">**7% improvement**</span> over the baseline heuristic algorithm
+* This translates to over <span style="color: green;">**$4 000 000 of savings**</span> on the budget required for the initiative implementation
+* After iterating the model over different budget amounts and looking at budget vs. performance sensitivity, <span style="color: green;">**$60 000 000 is an optimal budget**</span> that maximizes overall profit
 
 ## Contents
 

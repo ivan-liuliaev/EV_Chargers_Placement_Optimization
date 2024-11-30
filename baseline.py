@@ -17,7 +17,7 @@ tr = loaded_data['trips']
 # ---------------------------- PARAMETERS ----------------------------------------------------
 
 MILLION = 1_000_000
-BUDGET = 80 * MILLION       # Total budget
+BUDGET = 44 * MILLION       # Total budget
 STATION_COST = 25_000      # $250k per station
 CHARGER_COST = 5_000       # $50k per charger
 CAP_SPOT = 50_000          # Each charging spot serves up to 500,000 trips

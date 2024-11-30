@@ -80,7 +80,7 @@ def resolve_model_with_hyperparameters(
     # model.setParam('OutputFlag', 0)
 
     # Stop at objective confidence interval of n%
-    model.setParam('MIPGap', 0.05)
+    model.setParam('MIPGap', 0.01)
     # model.setParam('TimeLimit', 200000)  # Stop after 200 seconds
 
     print(f"Resolving the model...")
@@ -189,7 +189,7 @@ def main():
     CHARGER_COST = 50000  # does not update automatically, only after model.py rerun
 
     # Adjustable, update automatically
-    budgets = range(80 * MILLION, 111 * MILLION, 10 * MILLION)  # Budgets in dollars
+    budgets = range(40 * MILLION, 111 * MILLION, 10 * MILLION)  # Budgets in dollars
     # Convert budgets to list
     budgets = list(budgets)
 
