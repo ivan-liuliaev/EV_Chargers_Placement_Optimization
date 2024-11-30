@@ -1,12 +1,6 @@
-# Report 👀️
-
-##### Placement
+# Georgia public EV chargers placement optimization 🔮
 
 ![](assets/20241129_183434_Untitled_design-2.jpg)
-
-##### Optimization
-
-![](assets/20241129_183623_graphs.png)
 
 ## Results summary
 
@@ -23,7 +17,7 @@
 
 ## Problem statement
 
-### Come up with optimal locations for EV charging stations within the state of Georgia 🔮
+### Come up with optimal locations for EV charging stations within the state of Georgia 
 
 #### Factors to consider
 

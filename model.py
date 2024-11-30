@@ -1,7 +1,7 @@
 import pandas as pd
 import gurobipy as gp
 from gurobipy import Model, GRB, quicksum
-from synthetic_data_gen import GENERATE_DATA
+# from synthetic_data_gen import GENERATE_DATA
 import pickle
 
 # -------------------------------------------------------------------------------------------- 
