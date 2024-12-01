@@ -103,10 +103,13 @@ The model is formulated using the GurobiPy modeling syntax and solved with the G
 
 ## Model Results
 ### Chargers Placement
+![](assets/placement.png)
+
 ### Resulting Coverage
+![](assets/coverage.png)
+
 ### Top areas served by each Charging Station
+![](assets/trips.png)
+
 ### Optimal Budget: Budget-Performance sensitivity
 
-
-
-## Next Iterations
