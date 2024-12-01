@@ -6,16 +6,15 @@
 
 * The model demonstrates a **7% improvement** over the baseline heuristic algorithm
 * This translates to over **$4 000 000 in savings** on the initiative's implementation budget
-* After analyzing Budget-Performance sensitivity, **$60 000 000 is an optimal budget** is revealed as the optimal budget that maximizes overall profit
+* After analyzing Budget-Performance sensitivity, **$60 000 000 is revealed as the optimal budget** that maximizes overall profit
 
 
 
 ## Contents
-1. [Insights](#insights)
-2. [Problem statement](#problem-statement)
-3. [Solution design](#solution-design)
-4. [Results](#results)
-5. [Next Iterations](#next-iterations)
+- [Insights](#insights)
+- [Problem statement](#problem-statement)
+- [Solution design](#solution-design)
+- [Results](#model-results)
 
 
 
