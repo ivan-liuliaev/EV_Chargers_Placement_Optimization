@@ -4,20 +4,18 @@
 
 ## Results summary
 
-* The model demonstrates **7% improvement** over the baseline heuristic algorithm
-* This translates to over **$4 000 000 of savings** on the budget required for the initiative implementation
-* After iterating the model over different budget amounts and looking at budget vs. performance sensitivity, **$60 000 000 is an optimal budget** that maximizes overall profit
+* The model demonstrates a **7% improvement** over the baseline heuristic algorithm
+* This translates to over **$4 000 000 in savings** on the initiative's implementation budget
+* After analyzing budget-performance sensitivity, **$60 000 000 is an optimal budget** is revealed as the optimal budget that maximizes overall profit
 
 ## Contents
-
 1. [Insights](#insights)
 2. Problem statement
 3. Solution design
 4. Next Iterations
 
 ## Problem statement
-
-### Come up with optimal locations for EV charging stations within the state of Georgia 
+### Come up with optimal locations for EV charging stations within the state of Georgia 🚗 🔌 🔋
 
 #### Factors to consider
 
