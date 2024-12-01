@@ -63,7 +63,7 @@ def resolve_model_with_hyperparameters(
                 continue
             var.Start = 1 if previous_built_stations.get(site, 0) > 0 else 0
 
-    print("Warm start applied.")
+    # print("Warm start applied.")
 
     # Update budget constraint RHS
     budget_constraint = model.getConstrByName("budget_constraint")
@@ -77,7 +77,7 @@ def resolve_model_with_hyperparameters(
 
     # ---------------------------- RESOLVE THE MODEL ---------------------------------------
     # Turn off Gurobi logging
-    # model.setParam('OutputFlag', 0)
+    model.setParam('OutputFlag', 0)
 
     # Stop at objective confidence interval of n%
     model.setParam('MIPGap', 0.10)
@@ -96,18 +96,18 @@ def resolve_model_with_hyperparameters(
         print(f"Solution found with gap: {model.MIPGap * 100:.2f}%")
         print(f"Objective value: {model.ObjVal}")
 
-        print("Parameters given:")
-        print(f"BUDGET: {budget}")
-        print(f"STATION_COST: {station_cost}")
-        print(f"CHARGER_COST: {charger_cost}")
-        # print("CAP_SPOT:", cap_spot)
-        print(f"MAX_CHARGERS: {max_chargers}")
+        # print("Parameters given:")
+        # print(f"BUDGET: {budget}")
+        # print(f"STATION_COST: {station_cost}")
+        # print(f"CHARGER_COST: {charger_cost}")
+        # # print("CAP_SPOT:", cap_spot)
+        # print(f"MAX_CHARGERS: {max_chargers}")
 
         budget_constraint = model.getConstrByName("budget_constraint")
         slack = budget_constraint.Slack
         total_cost_used = budget - slack
         print(f"Total cost used: {total_cost_used}")
-        print(f"Budget constraint slack: {slack}")
+        # print(f"Budget constraint slack: {slack}")
 
         # Calculate total demand coverage
         total_demand_coverage = 0
@@ -129,19 +129,19 @@ def resolve_model_with_hyperparameters(
             1 for var in model.getVars()
             if var.VarName.startswith("is_built[") and var.X > 0.5
         )
-        print(f"Total number of stations built 1 is_built: {stations_built_1}")
+        # print(f"Total number of stations built 1 is_built: {stations_built_1}")
 
         stations_built_2 = sum(
             1 for var in model.getVars()
             if var.VarName.startswith("build[") and var.X > 0.5
         )
-        print(f"Total number of stations 2 build: {stations_built_2}")
+        # print(f"Total number of stations 2 build: {stations_built_2}")
 
         chargers_built = sum(
             var.X for var in model.getVars()
             if var.VarName.startswith("build[") and var.X > 0.5
         )
-        print(f"Total number of chargers built: {chargers_built}")
+        # print(f"Total number of chargers built: {chargers_built}")
 
         return {
             "total_demand_coverage": total_demand_coverage,
@@ -182,7 +182,7 @@ def main():
     try:
         with open("./data/model_output/built_stations.pkl", "rb") as f:
             previous_built_stations = pickle.load(f)
-        print("Previous built stations loaded.")
+        # print("Previous built stations loaded.")
     except FileNotFoundError:
         print("No previous solution found. Starting fresh.")
     except Exception as e:
@@ -195,7 +195,7 @@ def main():
     CHARGER_COST = 50000  # does not update automatically, only after model.py rerun
 
     # Adjustable, update automatically
-    budgets = range(40 * MILLION, 111 * MILLION, 10 * MILLION)  # Budgets in dollars
+    budgets = range(10 * MILLION, 111 * MILLION, 10 * MILLION)  # Budgets in dollars
     # Convert budgets to list
     budgets = list(budgets)
 
@@ -246,7 +246,7 @@ def main():
 
     # Uncomment the above lines to enable result exporting
 
-    print(f"\n RESULTS NOT SAVED")
+    # print(f"\n RESULTS NOT SAVED")
 
 if __name__ == "__main__":
     main()

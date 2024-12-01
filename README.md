@@ -35,8 +35,8 @@
 
 
 ### Evaluation criteria
--  Share of Electric Vehicle owners with seamless access to public charging
-Seemless means the charger is located at the place he currently travels to on a regular and thus do not have to spend additional time and effort to charge
+-  Share of Electric Vehicle owners with seamless access to public charging  
+Seamless means the charger is located at the place he currently travels to on a regular and thus do not have to spend additional time and effort to charge
 
 
 ## Data
@@ -54,6 +54,8 @@ The model is formulated using the GurobiPy modeling syntax and solved with the G
 
 
 ### Model Formulation:
+
+![](/data/readme_report_assets/model_framework.png)
 
 ### Sets and Indices
 - **Areas (A):** The different geographical areas that require EV charging coverage.
