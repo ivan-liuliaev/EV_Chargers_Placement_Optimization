@@ -15,6 +15,10 @@
 - [Problem statement](#problem-statement)
 - [Solution design](#solution-design)
 - [Results](#model-results)
+   - [Chargers Placement](#chargers-placement)
+   - [Resulting Coverage](#resulting-coverage)
+   - [Top areas served by each Charging Station](#top-areas-served-by-each-charging-station)
+   - [Optimal Budget: Budget-Performance sensitivity](#optimal-budget-budget-performance-sensitivity)
 
 
 
