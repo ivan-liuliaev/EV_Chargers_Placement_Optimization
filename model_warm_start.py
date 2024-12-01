@@ -80,7 +80,7 @@ def resolve_model_with_hyperparameters(
     # model.setParam('OutputFlag', 0)
 
     # Stop at objective confidence interval of n%
-    model.setParam('MIPGap', 0.01)
+    model.setParam('MIPGap', 0.10)
     # model.setParam('TimeLimit', 200000)  # Stop after 200 seconds
 
     print(f"Resolving the model...")
@@ -125,11 +125,17 @@ def resolve_model_with_hyperparameters(
         print(f"Total Demand Coverage Percentage: \033[1;31m{total_coverage_percentage:.2f}%\033[0m")
 
         # **Added Section: Calculate Number of Stations Built**
-        stations_built = sum(
+        stations_built_1 = sum(
+            1 for var in model.getVars()
+            if var.VarName.startswith("is_built[") and var.X > 0.5
+        )
+        print(f"Total number of stations built 1 is_built: {stations_built_1}")
+
+        stations_built_2 = sum(
             1 for var in model.getVars()
             if var.VarName.startswith("build[") and var.X > 0.5
         )
-        print(f"Total number of stations built: {stations_built}")
+        print(f"Total number of stations 2 build: {stations_built_2}")
 
         chargers_built = sum(
             var.X for var in model.getVars()
@@ -142,7 +148,7 @@ def resolve_model_with_hyperparameters(
             "total_coverage_percentage": total_coverage_percentage,
             "objective": model.ObjVal,
             "total_cost_used": total_cost_used,
-            "stations_built": stations_built  # **Added to the returned dictionary**
+            "stations_built": stations_built_1  # **Added to the returned dictionary**
         }
     else:
         print("No optimal solution found.")

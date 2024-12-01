@@ -42,7 +42,7 @@ tr = loaded_data['trips']
 # -------------------------------------------------------------------------------------------- 
 # ---------------------------- PARAMETERS ----------------------------------------------------
 MILLION = 1000000
-BUDGET = 80 * MILLION       # Total budget
+BUDGET = 40 * MILLION       # Total budget
 STATION_COST = 25000       # $250k per station
 CHARGER_COST = 5000        # $50k per charger
 CAP_SPOT = 50000           # Each charging spot serves up to 500,000 trips
@@ -110,7 +110,7 @@ model.addConstr(
 model.write("./data/model_output/saved_model.mps")  
 
 # stop at objective conf.interval of N%
-model.setParam('MIPGap', 0.05)
+model.setParam('MIPGap', 0.10)
 model.setParam('TimeLimit', 300)  # Stop after 300 seconds
 
 # Optimize the model
@@ -201,19 +201,19 @@ else:
 # -------------------------------------------------------------------------------------------- 
 # ---------------------------- OUTPUT EXPORT -------------------------------------------------
 
-# # Extract data about stations built and chargers
-# if model.status == GRB.OPTIMAL:
-#     built_stations = {j: build[j].x for j in P if build[j].x > 0}  # Only include sites where chargers are built
-#     coverage_percentages = {j: z[j].x * 100 for j in A}  # Calculate coverage as a percentage
+# Extract data about stations built and chargers
+if model.status == GRB.OPTIMAL:
+    built_stations = {j: build[j].x for j in P if build[j].x > 0}  # Only include sites where chargers are built
+    coverage_percentages = {j: z[j].x * 100 for j in A}  # Calculate coverage as a percentage
 
-#     # Export built stations and chargers to a pickle file
-#     with open("./data/model_output/built_stations.pkl", "wb") as f:
-#         pickle.dump(built_stations, f)
-#     print(f"Exported built stations and chargers data to 'built_stations.pkl'.")
+    # Export built stations and chargers to a pickle file
+    with open("./data/model_output/built_stations.pkl", "wb") as f:
+        pickle.dump(built_stations, f)
+    print(f"Exported built stations and chargers data to 'built_stations.pkl'.")
 
-#     # Export coverage percentages to a pickle file
-#     with open("./data/model_output/coverage_percentages.pkl", "wb") as f:
-#         pickle.dump(coverage_percentages, f)
-#     print(f"Exported coverage percentages to 'coverage_percentages.pkl'.")
-# else:
-#     print("No optimal solution found. Data not exported.")
+    # Export coverage percentages to a pickle file
+    with open("./data/model_output/coverage_percentages.pkl", "wb") as f:
+        pickle.dump(coverage_percentages, f)
+    print(f"Exported coverage percentages to 'coverage_percentages.pkl'.")
+else:
+    print("No optimal solution found. Data not exported.")

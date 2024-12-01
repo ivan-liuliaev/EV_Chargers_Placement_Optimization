@@ -1,12 +1,12 @@
 # Georgia public EV chargers placement optimization 🔮
 
-![](assets/20241129_183434_Untitled_design-2.jpg)
+![](assets/1130.gif)
 
 ## Results summary
 
 * The model demonstrates a **7% improvement** over the baseline heuristic algorithm
 * This translates to over **$4 000 000 in savings** on the initiative's implementation budget
-* After analyzing budget-performance sensitivity, **$60 000 000 is an optimal budget** is revealed as the optimal budget that maximizes overall profit
+* After analyzing Budget-Performance sensitivity, **$60 000 000 is an optimal budget** is revealed as the optimal budget that maximizes overall profit
 
 
 
@@ -32,14 +32,13 @@
 
 
 ### Evaluation criteria
--  Share of Electric Vehicle owners with seamless* access to public charging
-
-*Seemless means the charger is located at the place he currently travels to on a regular and thus do not have to spend additional time and effort to charge
+-  Share of Electric Vehicle owners with seamless access to public charging
+Seemless means the charger is located at the place he currently travels to on a regular and thus do not have to spend additional time and effort to charge
 
 
 ## Data
 - 3.5 million Georgia monthly Origin-Destination trips dataset
-- Population data by 2796 US Census Tracts in Georgia
+- Population data on 2796 US Census Tracts in Georgia
 - 7446 Georgia US Census blocks groups shapefiles
 
 
@@ -47,6 +46,9 @@
 ### Mixed-Integer Programming (MIP) model
 
 > Mathematical programming is a declarative approach where the modeler formulates a mathematical optimization model that captures the key aspects of a complex decision problem. 
+
+The model is formulated using the GurobiPy modeling syntax and solved with the Gurobi Optimizer.
+
 
 ### Model Formulation:
 
@@ -98,7 +100,12 @@
 
 
 
-## Results
+
+## Model Results
+### Chargers Placement
+### Resulting Coverage
+### Top areas served by each Charging Station
+### Optimal Budget: Budget-Performance sensitivity
 
 
 
