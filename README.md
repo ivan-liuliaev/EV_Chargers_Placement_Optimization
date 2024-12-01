@@ -11,7 +11,7 @@
 
 
 ## Contents
-- [Insights](#insights)
+- [Results summary](#results-summary)
 - [Problem statement](#problem-statement)
 - [Solution design](#solution-design)
 - [Results](#model-results)
