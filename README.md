@@ -111,4 +111,4 @@ The model is formulated using the GurobiPy modeling syntax and solved with the G
 ![](assets/trips.png)
 
 ### Optimal Budget: Budget-Performance sensitivity
-
+![](assets/curves.png)
