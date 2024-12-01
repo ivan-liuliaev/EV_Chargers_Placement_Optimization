@@ -202,18 +202,18 @@ else:
 # ---------------------------- OUTPUT EXPORT -------------------------------------------------
 
 # Extract data about stations built and chargers
-if model.status == GRB.OPTIMAL:
-    built_stations = {j: build[j].x for j in P if build[j].x > 0}  # Only include sites where chargers are built
-    coverage_percentages = {j: z[j].x * 100 for j in A}  # Calculate coverage as a percentage
+# if model.status == GRB.OPTIMAL:
+#     built_stations = {j: build[j].x for j in P if build[j].x > 0}  # Only include sites where chargers are built
+#     coverage_percentages = {j: z[j].x * 100 for j in A}  # Calculate coverage as a percentage
 
-    # Export built stations and chargers to a pickle file
-    with open("./data/model_output/built_stations.pkl", "wb") as f:
-        pickle.dump(built_stations, f)
-    print(f"Exported built stations and chargers data to 'built_stations.pkl'.")
+#     # Export built stations and chargers to a pickle file
+#     with open("./data/model_output/built_stations.pkl", "wb") as f:
+#         pickle.dump(built_stations, f)
+#     print(f"Exported built stations and chargers data to 'built_stations.pkl'.")
 
-    # Export coverage percentages to a pickle file
-    with open("./data/model_output/coverage_percentages.pkl", "wb") as f:
-        pickle.dump(coverage_percentages, f)
-    print(f"Exported coverage percentages to 'coverage_percentages.pkl'.")
-else:
-    print("No optimal solution found. Data not exported.")
+#     # Export coverage percentages to a pickle file
+#     with open("./data/model_output/coverage_percentages.pkl", "wb") as f:
+#         pickle.dump(coverage_percentages, f)
+#     print(f"Exported coverage percentages to 'coverage_percentages.pkl'.")
+# else:
+#     print("No optimal solution found. Data not exported.")

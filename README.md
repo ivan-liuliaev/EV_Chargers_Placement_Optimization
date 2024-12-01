@@ -1,13 +1,13 @@
 # Georgia public EV chargers placement optimization 🔮
 
-![](assets/front_animation.gif)
-
 ## Results summary
 
 * The model demonstrates a **7% improvement** over the baseline heuristic algorithm
 * This translates to over **$4 000 000 in savings** on the initiative's implementation budget
 * After analyzing Budget-Performance sensitivity, **$60 000 000 is revealed as the optimal budget** that maximizes overall profit
 
+
+![](/data/readme_report_assets/front_animation.gif)
 
 
 ## Contents
@@ -102,13 +102,13 @@ The model is formulated using the GurobiPy modeling syntax and solved with the G
 
 ## Model Results
 ### Chargers Placement
-![](assets/placement.png)
+![](/data/readme_report_assets/placement.png)
 
 ### Resulting Coverage
-![](assets/coverage.png)
+![](/data/readme_report_assets/coverage.png)
 
 ### Top areas served by each Charging Station
-![](assets/trips.png)
+![](/data/readme_report_assets/trips.png)
 
 ### Optimal Budget: Budget-Performance sensitivity
-![](assets/curves.png)
+![](/data/readme_report_assets/curves.png)
