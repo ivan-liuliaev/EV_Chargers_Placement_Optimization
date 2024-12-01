@@ -1,6 +1,6 @@
 # Georgia public EV chargers placement optimization 🔮
 
-![](assets/1130.gif)
+![](assets/front_animation.gif)
 
 ## Results summary
 
