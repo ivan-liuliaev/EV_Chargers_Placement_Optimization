@@ -118,3 +118,6 @@ The model is formulated using the GurobiPy modeling syntax and solved with the G
 
 ### Optimal Budget: Budget-Performance sensitivity
 ![](/data/readme_report_assets/curves.png)
+  
+  
+Repository with all the source files: https://github.com/ivan-liuliaev/EV_Chargers_Placement_Optimization
