@@ -7,7 +7,7 @@
 * After analyzing Budget-Performance sensitivity, **$60 000 000 is revealed as the optimal budget** that maximizes overall profit
 
 
-![](/data/readme_report_assets/front_animation.gif)
+![](/data/readme_report_assets/model_framework.png)
 
 
 ## Contents
@@ -54,8 +54,6 @@ The model is formulated using the GurobiPy modeling syntax and solved with the G
 
 
 ### Model Formulation:
-
-![](/data/readme_report_assets/model_framework.png)
 
 ### Sets and Indices
 - **Areas (A):** The different geographical areas that require EV charging coverage.
